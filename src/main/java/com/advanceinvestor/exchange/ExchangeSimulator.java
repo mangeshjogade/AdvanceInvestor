@@ -1,4 +1,4 @@
-package com.advanceinvestor.pricesimulator;
+package com.advanceinvestor.exchange;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,19 +8,20 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import com.advanceinvestor.automatedagent.Agent;
-import com.advanceinvestor.automatedagent.IAgent;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import com.advanceinvestor.common.AdvanceInvestorConstants;
 import com.advanceinvestor.vo.ExchangeOrderVO;
 
-
-public class ExchangeSimulator implements IExchangeSimulator,Runnable{
-	private boolean runExchange = true;
+@Component
+public class ExchangeSimulator implements IExchangeSimulator{
 	private Double basePrice;
 	private Double lastPrice;
 	private Integer maxChangeRange;
 	private Integer heartBeat = 1;
 	private int trendChangeCounter = 0;
+	
 	private List<Integer> trendChangeList = new ArrayList<Integer>();
 	
 	private List<ExchangeOrderVO> rowOrderList = new LinkedList<ExchangeOrderVO>();
@@ -29,28 +30,33 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 
 	private PriorityQueue<ExchangeOrderVO> sellLimitOrderQueue = new PriorityQueue<ExchangeOrderVO>(new OrderQComparator());
 
-	public IAgent agent;
-		
-	public ExchangeSimulator(Double basePrice) throws InterruptedException{
-		setBasePrice(basePrice);
+	public ExchangeSimulator() throws InterruptedException{
+		setBasePrice(100.0);
 		calculateRangeForChange(basePrice);
 		setLastPrice(generateRandomPrice(getBasePrice()));
+		trendChangeList.add(1);
+		trendChangeList.add(3);
+		trendChangeList.add(4);
+		trendChangeList.add(3);
+		trendChangeList.add(8);
+		trendChangeList.add(9);
+		trendChangeList.add(3);
+		trendChangeList.add(2);
+		trendChangeList.add(1);
+		trendChangeList.add(-1);
+		trendChangeList.add(-3);
+		trendChangeList.add(-3);
+		trendChangeList.add(-4);
+		trendChangeList.add(-6);
+		trendChangeList.add(-8);
 	}
 
-	@Override
+	 @Scheduled(fixedRate = 200)
 	public void run() {
-		while(runExchange){
-			try {
 				generatetNextPrice();
 				processTradeQueue();
 				if(heartBeat > 10000) heartBeat =1; 
 				else heartBeat++;
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}	
 	}
 	
 	private void calculateRangeForChange(Double basePrice){
@@ -85,8 +91,8 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 					intmdChange = 0.05 * trendChangeList.get(trendChangeCounter);
 				trendChangeCounter++;
 			}	
-			/*else
-				trendChangeCounter = 0;*/
+			else
+				trendChangeCounter = 0;
 			return startingPrice + intmdChange;
 		}	
 		//System.out.println(randomDouble);
@@ -145,7 +151,7 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 		while(marketOrderQueue.size() > 0){
 			ExchangeOrderVO headOrder = marketOrderQueue.poll();
 			headOrder.setExecutionPrice(getLastPrice());
-			agent.tradeConfirmationCallBack(headOrder);
+			//agent.tradeConfirmationCallBack(headOrder);
 		}
 		
 		//process Buy Limit Order Q 
@@ -154,7 +160,7 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 			if(headOrder.getPrice() >= getLastPrice()){
 				headOrder = buyLimitOrderQueue.poll();
 				headOrder.setExecutionPrice(getLastPrice());
-				agent.tradeConfirmationCallBack(headOrder);
+				//agent.tradeConfirmationCallBack(headOrder);
 			}else{
 				break;
 			}
@@ -165,7 +171,7 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 			if(headOrder.getPrice() <= getLastPrice()){
 				headOrder = sellLimitOrderQueue.poll();
 				headOrder.setExecutionPrice(getLastPrice());
-				agent.tradeConfirmationCallBack(headOrder);
+				//agent.tradeConfirmationCallBack(headOrder);
 			}else{
 				break;
 			}
@@ -193,10 +199,6 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 		return false;
 	}
 
-	public void stopProcessing(){
-		runExchange = false;
-	}
-	
 	private Double getBasePrice() {
 		return basePrice;
 	}
@@ -221,10 +223,6 @@ public class ExchangeSimulator implements IExchangeSimulator,Runnable{
 		this.lastPrice = lastPrice;
 	}
 
-
-	public void setAgent(IAgent agent) {
-		this.agent = agent;
-	}
 
 	public void setTrendChangeList(List<Integer> trendChangeList) {
 		this.trendChangeList = trendChangeList;
