@@ -1,4 +1,4 @@
-package com.advanceinvestor.pricesimulator;
+package com.advanceinvestor.exchange;
 
 import com.advanceinvestor.vo.ExchangeOrderVO;
 
