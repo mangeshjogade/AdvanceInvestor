@@ -183,14 +183,14 @@ public class ExchangeSimulator implements IExchangeSimulator{
 		System.out.println("---------------------Exchange Received Order------------------");
 		System.out.println(exchangeOrderVO);
 		System.out.println("--------------------------------------------------------------\n");
-		if(orderFormatCorrect(exchangeOrderVO)){
+		if(isOrderFormatCorrect(exchangeOrderVO)){
 			rowOrderList.add(exchangeOrderVO);
 			return "SUCCESS";
 		}	
 		return "FAILURE";
 	}
 	
-	private boolean orderFormatCorrect(ExchangeOrderVO exchangeOrderVO) {
+	private boolean isOrderFormatCorrect(ExchangeOrderVO exchangeOrderVO) {
 		if(null!=exchangeOrderVO.getOrder()
 		&& null!=exchangeOrderVO.getOrderQuantity()
 		&& null!=exchangeOrderVO.getPrice()

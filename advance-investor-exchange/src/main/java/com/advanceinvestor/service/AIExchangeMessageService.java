@@ -14,13 +14,8 @@ public class AIExchangeMessageService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 	
-	
 	@Scheduled(fixedRate = 1000)
 	public void writeLivePrice(){
-		//ExchangeInstrumentPrice exchangeInstrumentPrice = exchangeService.getCurrentPrice();
-		//System.out.println(exchangeInstrumentPrice);
-		//return exchangeService.getCurrentPrice();
-		
 		simpMessagingTemplate.convertAndSend("/topic/live-price",exchangeService.getCurrentPrice());
 	}
 }

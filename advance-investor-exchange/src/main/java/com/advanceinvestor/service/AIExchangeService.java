@@ -18,4 +18,7 @@ public class AIExchangeService {
 		exchangeInstrumentPrice.setPrice(exchangeSimulator.getLastPrice());
 		return exchangeInstrumentPrice; 
 	}
+	
+	
+	
 }
