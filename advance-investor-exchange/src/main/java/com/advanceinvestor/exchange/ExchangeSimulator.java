@@ -2,19 +2,21 @@ package com.advanceinvestor.exchange;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.advanceinvestor.common.AdvanceInvestorConstants;
 import com.advanceinvestor.vo.ExchangeOrderVO;
 
-@Component
+@Service
 public class ExchangeSimulator implements IExchangeSimulator{
 	private Double basePrice;
 	private Double lastPrice;
@@ -23,6 +25,7 @@ public class ExchangeSimulator implements IExchangeSimulator{
 	private int trendChangeCounter = 0;
 	
 	private List<Integer> trendChangeList = new ArrayList<Integer>();
+	private Map<String,ExchangeOrderVO> orderBookMap = new HashMap<>();
 	
 	private List<ExchangeOrderVO> rowOrderList = new LinkedList<ExchangeOrderVO>();
 	private PriorityQueue<ExchangeOrderVO> marketOrderQueue = new PriorityQueue<ExchangeOrderVO>(new OrderQComparator());
@@ -49,6 +52,8 @@ public class ExchangeSimulator implements IExchangeSimulator{
 		trendChangeList.add(-4);
 		trendChangeList.add(-6);
 		trendChangeList.add(-8);
+		
+		orderBookMap.put("-1", new ExchangeOrderVO());
 	}
 
 	 @Scheduled(fixedRate = 200)
@@ -152,6 +157,7 @@ public class ExchangeSimulator implements IExchangeSimulator{
 			ExchangeOrderVO headOrder = marketOrderQueue.poll();
 			headOrder.setExecutionPrice(getLastPrice());
 			//agent.tradeConfirmationCallBack(headOrder);
+			orderBookMap.put(headOrder.getOrderID(), headOrder);
 		}
 		
 		//process Buy Limit Order Q 
@@ -161,6 +167,7 @@ public class ExchangeSimulator implements IExchangeSimulator{
 				headOrder = buyLimitOrderQueue.poll();
 				headOrder.setExecutionPrice(getLastPrice());
 				//agent.tradeConfirmationCallBack(headOrder);
+				orderBookMap.put(headOrder.getOrderID(), headOrder);
 			}else{
 				break;
 			}
@@ -172,6 +179,7 @@ public class ExchangeSimulator implements IExchangeSimulator{
 				headOrder = sellLimitOrderQueue.poll();
 				headOrder.setExecutionPrice(getLastPrice());
 				//agent.tradeConfirmationCallBack(headOrder);
+				orderBookMap.put(headOrder.getOrderID(), headOrder);
 			}else{
 				break;
 			}
@@ -179,7 +187,7 @@ public class ExchangeSimulator implements IExchangeSimulator{
 	}
 	
 	@Override
-	public synchronized String orderPlacementCallBack(ExchangeOrderVO exchangeOrderVO) {
+	public synchronized String placeOrder(ExchangeOrderVO exchangeOrderVO) {
 		System.out.println("---------------------Exchange Received Order------------------");
 		System.out.println(exchangeOrderVO);
 		System.out.println("--------------------------------------------------------------\n");
@@ -230,6 +238,11 @@ public class ExchangeSimulator implements IExchangeSimulator{
 	
 	public List<Integer> getTrendChangeList() {
 		return this.trendChangeList;
+	}
+
+	@Override
+	public Map<String, ExchangeOrderVO> getOrderBookMap() {
+		return orderBookMap;
 	}
 
 
