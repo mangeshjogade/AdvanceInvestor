@@ -1,5 +1,7 @@
 package com.advanceinvestor.service;
 
+import java.util.Date;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,6 +14,7 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.advanceinvestor.common.CommonUtil;
 import com.advanceinvestor.exchange.ExchangeSimulator;
 import com.advanceinvestor.vo.ExchangeInstrumentPrice;
 import com.advanceinvestor.vo.ExchangeOrderVO;
@@ -55,6 +58,7 @@ public class AIExchangeService {
 	@Path("/orders")
 	@Consumes("application/json")
 	public Response createOrder(ExchangeOrderVO exchangeOrderVO) {
+		exchangeOrderVO.setOrderID(CommonUtil.getOrderIDStringFormat().format(new Date()));
 		String serviceResponse = exchangeSimulator.placeOrder(exchangeOrderVO);
 		Response response = serviceResponse.equalsIgnoreCase("SUCCESS")?Response.status(Response.Status.CREATED).build() :Response.status(Response.Status.BAD_REQUEST).build(); 
 		return response;
